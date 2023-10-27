@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout/Layout';
 import { NotFound } from './pages/NotFound/NotFound';
-import DummyChart from './pages/tabs/DummyChart';
-import DummyList from './pages/tabs/DummyList';
-import DummyTable from './pages/tabs/DummyTable';
+import useLocalStorage from './hooks/useLocalStorage';
 
 const tabsData = require('./tabs.json');
 
@@ -21,36 +19,38 @@ function lazyLoadComponent(path) {
   return React.lazy(() => import(`./pages/${formattedPath}`));
 }
 
-
 const lazyTabs = tabsData.map(tab => ({
   ...tab,
   component: lazyLoadComponent(tab.path)
 }));
 
-
 function App() {
+  const defaultPath = tabsData.sort((a, b) => a.order - b.order)[0].id;
   const [tabs, setTabs] = useState([]);
+  const [currentPath, setCurrentPath] = useLocalStorage("currentPath", defaultPath);
+  const location = useLocation();
+
+  useEffect(() => {
+    setCurrentPath(location.pathname.substring(1)); // Удаляем начальный "/"
+  }, [location.pathname, setCurrentPath]);
 
   useEffect(() => {
     setTabs(lazyTabs);
   }, []);
-  const defaultPath = tabsData.sort((a, b) => a.order - b.order)[0].id;
 
   return (
     <div>
       <Routes>
         <Route path="/" element={<Layout tabs={tabs} />}>
-          <Route path="/" element={<Navigate to={`/${defaultPath}`} />} />
-          <Route path="dummyChart" element={<DummyChart />} />
-          <Route path="dummyList" element={<DummyList />} />
-          <Route path="dummyTable" element={<DummyTable />} />
-          {/* {lazyTabs.map(tab => (
+          <Route path="/" element={<Navigate to={`/${currentPath}`} />} />
+          {lazyTabs.map(tab => (
             <Route key={tab.id} path={`/${tab.id}`} element={<tab.component />} />
-          ))} */}
+          ))}
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
 }
+
 export default App;
