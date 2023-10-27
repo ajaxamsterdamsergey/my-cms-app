@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkmy_cms_app=self.webpackChunkmy_cms_app||[]).push([[269],{269:function(n,e,p){p.r(e),p.d(e,{TD:function(){return o},Wrapper:function(){return u}});var r,a,c=p(168),t=p(867),u=t.ZP.table(r||(r=(0,c.Z)(["\nmargin:20px auto;\n"]))),o=t.ZP.td(a||(a=(0,c.Z)(["\ncolor: rebeccapurple;\nfont-size: 24px;\nfont-family: monospace;\n"])))}}]);
-//# sourceMappingURL=269.30f5966a.chunk.js.map
