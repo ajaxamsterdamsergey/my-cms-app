@@ -1,25 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Layout } from './components/Layout/Layout';
+import { NotFound } from './pages/NotFound/NotFound';
+
+const tabsData = require('./tabs.json');
+
+function capitalizeLastWord(path) {
+  const parts = path.split('/');
+  const lastPart = parts[parts.length - 1];
+  const capitalizedLastPart = lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
+  parts[parts.length - 1] = capitalizedLastPart;
+  return parts.join('/');
+}
+
+function lazyLoadComponent(path) {
+  const formattedPath = capitalizeLastWord(path);
+  return React.lazy(() => import(`./pages/${formattedPath}`));
+}
+
+
+const lazyTabs = tabsData.map(tab => ({
+  ...tab,
+  component: lazyLoadComponent(tab.path)
+}));
+
 
 function App() {
+  const [tabs, setTabs] = useState([]);
+
+  useEffect(() => {
+    setTabs(lazyTabs);
+  }, []);
+  const defaultPath = tabsData.sort((a, b) => a.order - b.order)[0].id;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Routes>
+        <Route path="/" element={<Layout tabs={tabs} />}>
+          <Route path="/" element={<Navigate to={`/${defaultPath}`} />} />
+          {lazyTabs.map(tab => (
+            <Route key={tab.id} path={`/${tab.id}`} element={<tab.component />} />
+          ))}
+        </Route>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </div>
   );
 }
-
 export default App;
